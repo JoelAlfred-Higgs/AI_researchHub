@@ -7,7 +7,7 @@ from DataBase import SessionLocal, engine, get_db
 note_router = APIRouter()
 Base.metadata.create_all(bind = engine) #creates a table in mysql
 
-@note_router.get("/{note_id}")
+@note_router.get("/{note_id}") #changed the endpoint to standard api endpoints
 def get_note(note_id: int,db:SessionLocal = Depends(get_db)):
     find_note = getnote(note_id,db)
     if find_note is not None:
@@ -18,13 +18,13 @@ def get_note(note_id: int,db:SessionLocal = Depends(get_db)):
         }   
     raise HTTPException(status_code=404, detail="Note not found!")
   
-@note_router.post("/add_note")
+@note_router.post("/{id}")
 def add_note(note:CreateNote,db:SessionLocal = Depends(get_db)):
     new_note = Note(note_id = note.note_id,title = note.title,content = note.content)
     addnote(new_note,db)
     return "Note added Successfully!"
 
-@note_router.put("/update_note")
+@note_router.put("/{id}")
 def update_note(id:int,content:UpdateNote,db:SessionLocal = Depends(get_db)):
     updated = updatenote(Note,content,id,db)
     if updated is not None:
@@ -34,7 +34,7 @@ def update_note(id:int,content:UpdateNote,db:SessionLocal = Depends(get_db)):
             "content":updated.content
                       } 
     return "Note does not exist!"
-@note_router.delete("/delete_note")
+@note_router.delete("/{id}")
 def delete_note(id:int,db:SessionLocal = Depends(get_db)):
     deleted = deletenote(Note,id,db)
     if deleted:
