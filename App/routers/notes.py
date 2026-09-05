@@ -26,7 +26,7 @@ def add_note(note:CreateNote):
     db = SessionLocal()
     addnote(new_note,db)
     db.close()
-    return "Content Updated Successfully!"
+    return "Note added Successfully!"
 
 @note_router.put("/update_note")
 def update_note(id:int,content:UpdateNote):
