@@ -13,12 +13,15 @@ def updatenote(Note,content,note_id,db):
     if un:
        un.content = content
        db.commit()
+       db.refresh(un)
        return un
       
     return None
     
 def deletenote(Note,note_id,db):
     delete = db.query(Note).filter(Note.note_id == note_id).first()
-    db.delete(delete)
-    db.commit()
-    return 1
+    if delete is not None:
+       db.delete(delete)
+       db.commit()
+       return 1
+    return None
