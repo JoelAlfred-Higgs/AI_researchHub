@@ -7,7 +7,7 @@ engine = create_engine(db_url)
 
 SessionLocal = sessionmaker(autocommit = False,autoflush = False,bind = engine)
 
-def get_db():
+def get_db(): #dependancy injection
     db  = SessionLocal()
     try:
         yield db
