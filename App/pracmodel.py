@@ -19,3 +19,9 @@ class CreateNote(BaseModel):
 
 class UpdateNote(BaseModel):
     content:str
+
+class NoteResponse(BaseModel):
+    note_id : int
+    title : str
+    content : str
+    
