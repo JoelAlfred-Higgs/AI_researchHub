@@ -22,7 +22,7 @@ def add_note(note:CreateNote,db:SessionLocal = Depends(get_db)):
     new_note = addnote(new_note,db)
     if new_note is not None:
         return new_note
-    raise HTTPException(status_code=400, detail="Note not added!")
+    raise HTTPException(status_code=409, detail="Note already exists!")
 
 @note_router.put("/{id}",response_model = NoteResponse,status_code=200)
 def update_note(id:int,content:UpdateNote,db:SessionLocal = Depends(get_db)):
