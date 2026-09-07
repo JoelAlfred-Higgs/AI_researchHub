@@ -1,6 +1,6 @@
 from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy import Column, Integer, String
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 class Base(DeclarativeBase):
     pass
@@ -24,4 +24,5 @@ class NoteResponse(BaseModel):
     note_id : int
     title : str
     content : str
+    model_config = ConfigDict(from_attributes=True)
     
