@@ -5,6 +5,7 @@ from crud import getnote,addnote,updatenote,deletenote
 from DataBase import SessionLocal, engine, get_db
 from sqlalchemy.orm import Session
 
+# working good
 
 note_router = APIRouter()
 Base.metadata.create_all(bind = engine) #creates a table in mysql
