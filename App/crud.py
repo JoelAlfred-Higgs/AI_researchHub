@@ -1,6 +1,5 @@
 
-from pracmodel import Note
-from models import User
+from models import Note,User,Category
 
 def getnote(note_id,db):
  return db.query(Note).filter(Note.note_id == note_id).first()
@@ -43,3 +42,22 @@ def adduser(user, db):
 
 def getuser(user_id,db):
     return db.query(User).filter(User.user_id == user_id).first()
+
+def addcategory(new_category,db):
+    user_exist =  db.query(User).filter(User.user_id == new_category.owner_id).first() 
+    if user_exist is None:
+        return None    
+    new_category = Category(categ_name = new_category.categ_name,owner_id = new_category.owner_id)
+    db.add(new_category)
+    db.commit()
+    db.refresh(new_category)
+    return new_category
+
+def getcategory(category_id,db):
+    return db.query(Category).filter(Category.categ_id == category_id).first()
+
+def updatecategory(category,db):
+   ...
+
+def deletecategory(category_id,db):
+    ... 
