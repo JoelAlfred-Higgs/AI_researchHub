@@ -1,7 +1,6 @@
 from pydantic import BaseModel,EmailStr,ConfigDict
 
 class CreateUser(BaseModel):
-        user_id : int
         user_name : str
         email : EmailStr
         #EmailStr is a specialized data type in the Pydantic data validation library for Python. It checks that input text matches correct email formatting rules.
@@ -12,8 +11,9 @@ class CheckUser(BaseModel):
         email : EmailStr
 
 class CreateNote(BaseModel):
+        owner_id : int
         title : str
-        content : str
+        content : str   
         category_id :int
 
 class CreateCategory(BaseModel):
@@ -36,7 +36,7 @@ class NoteResponse(BaseModel):
         note_id : int
         title : str
         content : str
-        categ_id :int
+        category_id :int
         owner_id : int 
         model_config = ConfigDict(from_attributes=True)
 
