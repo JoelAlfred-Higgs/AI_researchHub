@@ -7,6 +7,10 @@ def getnote(note_id,db):
 def addnote(new_note,db):
     if db.query(Note).filter(Note.note_id == new_note.note_id).first():
         return None
+    if db.query(Category).filter(Category.category_id == new_note.category_id).first() is None:
+        return None
+    if db.query(User).filter(User.user_id == new_note.owner_id).first() is None:
+        return None
     db.add(new_note)
     db.commit()
     db.refresh(new_note)
@@ -56,8 +60,19 @@ def addcategory(new_category,db):
 def getcategory(category_id,db):
     return db.query(Category).filter(Category.categ_id == category_id).first()
 
-def updatecategory(category,db):
-   ...
+def updatecategory(category_id,new_categ,db):
+   check_categ = db.query(Category).filter(Category.categ_id == category_id).first()
+   if check_categ is None:
+       return None
+   check_categ.categ_name = new_categ.categ_name
+   db.commit()
+   db.refresh(check_categ)
+   return check_categ  
 
 def deletecategory(category_id,db):
-    ... 
+    del_categ = db.query(Category).filter(Category.categ_id == category_id).first()
+    if del_categ is None:
+        return None 
+    db.delete(del_categ)
+    db.commit()
+    return del_categ
