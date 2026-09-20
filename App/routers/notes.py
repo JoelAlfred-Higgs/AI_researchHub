@@ -1,11 +1,10 @@
 from fastapi import APIRouter
 from fastapi import HTTPException,Depends
-from pracmodel import Note,CreateNote,UpdateNote,Base,NoteResponse
+from schemas import CreateNote,UpdateNote,NoteResponse
 from crud import getnote,addnote,updatenote,deletenote
 from DataBase import SessionLocal, engine, get_db
 from sqlalchemy.orm import Session
-
-# working good
+from models import Note,Base
 
 note_router = APIRouter()
 Base.metadata.create_all(bind = engine) #creates a table in mysql
@@ -20,7 +19,7 @@ def get_note(note_id: int,db:Session = Depends(get_db)):
 
 @note_router.post("/",response_model = NoteResponse,status_code=201)
 def add_note(note:CreateNote,db:Session = Depends(get_db)):
-    new_note = Note(note_id = note.note_id,title = note.title,content = note.content)
+    new_note = Note(owner_id = note.owner_id ,title = note.title,content = note.content,category_id = note.category_id)
     new_note = addnote(new_note,db)
     if new_note is not None:
         return new_note
