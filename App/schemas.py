@@ -1,4 +1,5 @@
 from pydantic import BaseModel,EmailStr,ConfigDict
+from typing import Optional
 
 class CreateUser(BaseModel):
         user_name : str
@@ -37,7 +38,7 @@ class NoteResponse(BaseModel):
         title : str
         content : str
         category_id :int
-        owner_id : int 
+        owner_id : Optional[int] = None
         model_config = ConfigDict(from_attributes=True)
 
 class UpdateNote(BaseModel):
