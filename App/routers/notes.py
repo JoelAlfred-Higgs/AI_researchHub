@@ -2,7 +2,7 @@ from fastapi import APIRouter
 from fastapi import HTTPException,Depends
 from schemas import CreateNote,UpdateNote,NoteResponse
 from crud import getnote,addnote,updatenote,deletenote
-from DataBase import SessionLocal, engine, get_db
+from DataBase import  engine, get_db
 from sqlalchemy.orm import Session
 from models import Note,Base
 
@@ -15,7 +15,6 @@ def get_note(note_id: int,db:Session = Depends(get_db)):
     if find_note is None:
        raise HTTPException(status_code=404, detail="Note not found!")
     return find_note
-
 
 @note_router.post("/",response_model = NoteResponse,status_code=201)
 def add_note(note:CreateNote,db:Session = Depends(get_db)):
@@ -37,6 +36,6 @@ def update_note(id:int,content:UpdateNote,db:Session = Depends(get_db)):
 def delete_note(id:int,db:Session = Depends(get_db)):
     deleted = deletenote(id,db)
     if deleted:
-        return "Note deleted Successfully!"
+        return 
     raise HTTPException(status_code=404, detail="Note not found!")
 
