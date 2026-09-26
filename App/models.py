@@ -17,7 +17,7 @@ class Category(Base): #holds the category of notes
     __tablename__ = "categories" 
     categ_id = Column(Integer,primary_key = True,index = True)
     categ_name = Column(String(100),nullable = False)
-    owner_id = Column(Integer,ForeignKey("users.user_id"))
+    owner_id = Column(Integer,ForeignKey("users.user_id"),nullable = False)
     user = relationship("User",back_populates="category")
     notes = relationship("Note",back_populates = "category")
 
@@ -26,7 +26,7 @@ class Note(Base):
     note_id  = Column(Integer,primary_key = True,index = True)
     title = Column(String(50),nullable = False)
     content  = Column(Text,nullable = False)
-    owner_id = Column(Integer,ForeignKey("users.user_id"))
-    category_id = Column(Integer,ForeignKey("categories.categ_id"))
+    owner_id = Column(Integer,ForeignKey("users.user_id"),nullable = False)
+    category_id = Column(Integer,ForeignKey("categories.categ_id"),nullable = False)
     category = relationship("Category",back_populates = "notes")
     user = relationship("User",back_populates = "notes")
