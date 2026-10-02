@@ -4,12 +4,23 @@ from models import Note,User,Category
 def getnote(note_id,db):
  return db.query(Note).filter(Note.note_id == note_id).first()
 
+def getallnotes(db,owner_id):
+    return db.query(Note).filter(Note.owner_id  == owner_id).all()
+
+def getallnotes_bycategory(db,owner_id,categ_id):
+    return db.query(Note).filter(Note.owner_id == owner_id,Note.category_id == categ_id).all()
+
+def getcategory_byuser(db,owner_id):
+    return db.query(Category).filter(Category.owner_id == owner_id).all()
+
 def addnote(new_note,db):
     if db.query(Note).filter(Note.note_id == new_note.note_id).first():
         return None
     if db.query(Category).filter(Category.categ_id == new_note.category_id).first() is None:
         return None
     if db.query(User).filter(User.user_id == new_note.owner_id).first() is None:
+        return None
+    if db.query(Category).filter(Category.owner_id == new_note.owner_id,Category.categ_id  == new_note.category_id).first() is None:
         return None
     db.add(new_note)
     db.commit()
@@ -22,7 +33,10 @@ def updatenote(content,note_id,db):
         return None
     note_exist = db.query(Note).filter(Note.note_id == note_id).first()
     if note_exist is None:
-        return None     
+        return None  
+    owner_exist = db.query(Category).filter(Category.owner_id == note_exist.owner_id,Category.categ_id == content.category_id).first()
+    if owner_exist is None:
+        return None
     if note_exist:
        note_exist.title = content.title
        note_exist.content = content.content
@@ -33,13 +47,18 @@ def updatenote(content,note_id,db):
     else:
         return None
       
-def deletenote(note_id,db):
+def deletenote(note_id, owner_id, db):
     delete = db.query(Note).filter(Note.note_id == note_id).first()
-    if delete is not None:
-       db.delete(delete)
-       db.commit()
-       return 1
-    return None
+
+    if delete is None:
+        return None
+
+    if delete.owner_id != owner_id:
+        return None
+
+    db.delete(delete)
+    db.commit()
+    return 1
 
 
 def adduser(user, db):
@@ -67,19 +86,28 @@ def addcategory(new_category,db):
 def getcategory(category_id,db):
     return db.query(Category).filter(Category.categ_id == category_id).first()
 
-def updatecategory(category_id,new_categ,db):
+def updatecategory(category_id,owner_id,new_categ,db):
    check_categ = db.query(Category).filter(Category.categ_id == category_id).first()
    if check_categ is None:
        return None
-   check_categ.categ_name = new_categ.categ_name
-   db.commit()
-   db.refresh(check_categ)
-   return check_categ  
+   if check_categ.owner_id == owner_id:
+        check_categ.categ_name = new_categ.categ_name
+        db.commit()
+        db.refresh(check_categ) 
+        return check_categ 
+   return None 
 
-def deletecategory(category_id,db):
+def deletecategory(category_id, owner_id, db):
     del_categ = db.query(Category).filter(Category.categ_id == category_id).first()
+
     if del_categ is None:
-        return None 
+        return None
+    if del_categ.owner_id != owner_id:
+        return None
+    notes_exist = db.query(Note).filter(Note.category_id == category_id).first()
+    if notes_exist is not None:
+        return None
     db.delete(del_categ)
     db.commit()
-    return del_categ
+
+    return 1

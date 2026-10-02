@@ -1,4 +1,4 @@
-from sqlalchemy.orm import DeclarativeBase
+"""from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy import Column, Integer, String
 from pydantic import BaseModel, Field, ConfigDict
 
@@ -26,3 +26,4 @@ class NoteResponse(BaseModel):
     content : str
     model_config = ConfigDict(from_attributes=True)
     
+"""
