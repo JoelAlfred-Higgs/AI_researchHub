@@ -4,12 +4,17 @@ from typing import Optional
 class CreateUser(BaseModel):
         user_name : str
         email : EmailStr
+        password : str
         #EmailStr is a specialized data type in the Pydantic data validation library for Python. It checks that input text matches correct email formatting rules.
 
 class CheckUser(BaseModel):
         user_id : int
         user_name : str
         email : EmailStr
+
+class LoginUser(BaseModel):
+    email: EmailStr
+    password: str
 
 class CreateNote(BaseModel):
         owner_id : int
@@ -45,7 +50,7 @@ class UpdateNote(BaseModel):
         title:str
         content :str
         category_id : int
-        
+
 
 
         
