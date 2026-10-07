@@ -8,6 +8,7 @@ class User(Base): #stores the details of the user
     user_id = Column(Integer,primary_key=True)
     user_name = Column(String(30),nullable = False,unique = True)
     email = Column(String(50),nullable = False,unique = True)
+    password = Column(String(200),nullable = False)
     category = relationship("Category",back_populates = "user")
     notes  = relationship("Note",back_populates = "user")
     
