@@ -1,5 +1,6 @@
 
 from models import Note,User,Category
+from security import hash_password,verify_password
 
 def getnote(note_id,db):
  return db.query(Note).filter(Note.note_id == note_id).first()
@@ -64,7 +65,9 @@ def deletenote(note_id, owner_id, db):
 def adduser(user, db):
     if db.query(User).filter((User.user_name == user.user_name) | (User.email == user.email)).first():
         return None
-    new_user = User(user_name=user.user_name,email=user.email)
+    hashed_password = hash_password(user.password)
+
+    new_user = User(user_name=user.user_name,email=user.email,password=hashed_password)
     db.add(new_user)    
     db.commit()
     db.refresh(new_user)
@@ -72,6 +75,14 @@ def adduser(user, db):
 
 def getuser(user_id,db):
     return db.query(User).filter(User.user_id == user_id).first()
+
+def checklogin(email,pwd,db):
+    find_user = db.query(User).filter(User.email == email).first()
+    if find_user is None:
+        return None
+    if verify_password(pwd,find_user.password):
+        return find_user
+    return None
 
 def addcategory(new_category,db):
     user_exist =  db.query(User).filter(User.user_id == new_category.owner_id).first() 
