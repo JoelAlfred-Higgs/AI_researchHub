@@ -17,14 +17,12 @@ class LoginUser(BaseModel):
     password: str
 
 class CreateNote(BaseModel):
-        owner_id : int
         title : str
         content : str   
         category_id :int
 
 class CreateCategory(BaseModel):
         categ_name : str
-        owner_id :int 
 
 class UserResponse(BaseModel):
         user_id : int
@@ -51,6 +49,9 @@ class UpdateNote(BaseModel):
         content :str
         category_id : int
 
+class TokenResponse(BaseModel):
+    access_token: str
+    token_type: str
 
 
         
