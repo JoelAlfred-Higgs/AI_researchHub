@@ -4,10 +4,16 @@ from schemas import CreateNote,UpdateNote,NoteResponse
 from crud import getnote,addnote,updatenote,deletenote,getallnotes,getallnotes_bycategory
 from DataBase import engine, get_db
 from sqlalchemy.orm import Session
-from models import Note,Base
+from models import Note,Base,User
+from dependencies import get_current_user
 
 note_router = APIRouter()
 Base.metadata.create_all(bind = engine) #creates a table in mysql
+
+@note_router.get("/mine", response_model=list[NoteResponse], status_code=200)
+def get_all_notes(current_user : User = Depends(get_current_user) ,db: Session = Depends(get_db)):
+    return getallnotes(db,current_user.user_id) 
+
 
 @note_router.get("/{note_id}",response_model=NoteResponse,status_code=200) #changed the endpoint to standard api endpoints
 def get_note(note_id: int,db:Session = Depends(get_db)):
@@ -16,12 +22,7 @@ def get_note(note_id: int,db:Session = Depends(get_db)):
        raise HTTPException(status_code=404, detail="Note not found!")
     return find_note
 
-@note_router.get("/user/{owner_id}", response_model=list[NoteResponse], status_code=200)
-def get_all_notes(owner_id: int,db: Session = Depends(get_db)):
-    notes = getallnotes(db,owner_id) 
-    if notes is None:
-        raise HTTPException(status_code=404, detail="No notes found for user!")
-    return notes    
+ 
 
 @note_router.get("/user/{owner_id}/{categ_id}",response_model = list[NoteResponse],status_code = 200)
 def get_notes_bycategory(owner_id:int,categ_id:int,db:Session = Depends(get_db)):
@@ -31,11 +32,11 @@ def get_notes_bycategory(owner_id:int,categ_id:int,db:Session = Depends(get_db))
     return notes_by_category
 
 @note_router.post("/",response_model = NoteResponse,status_code=201)
-def add_note(note:CreateNote,db:Session = Depends(get_db)):
-    new_note = Note(owner_id = note.owner_id ,title = note.title,content = note.content,category_id = note.category_id)
-    new_note = addnote(new_note,db)
-    if new_note is not None:
-        return new_note
+def add_note(note:CreateNote,current_user : User = Depends(get_current_user),db:Session = Depends(get_db)):
+    new_note = Note(owner_id = current_user.user_id ,title = note.title,content = note.content,category_id = note.category_id)
+    res = addnote(new_note,db)
+    if res is not None:
+        return res
     raise HTTPException(status_code=409, detail="Note already exists!")
 
 @note_router.put("/{id}",response_model = NoteResponse,status_code=200)
