@@ -4,23 +4,26 @@ from models import Category,Base
 from schemas import CreateCategory, CategoryResponse
 from fastapi import APIRouter,HTTPException,Depends
 from sqlalchemy.orm import Session
+from dependencies import get_current_user
+from models import User
 
 categ_router = APIRouter()
 Base.metadata.create_all(bind = engine) #creates table for categories
 
 @categ_router.post("/",response_model = CategoryResponse,status_code = 201)
-def add_category(categ:CreateCategory,db:Session = Depends(get_db)):
-    res = addcategory(categ,db)
+def add_category(categ:CreateCategory,current_user:User = Depends(get_current_user),db:Session = Depends(get_db)):
+    new_cat = Category(owner_id = current_user.user_id,categ_name = categ.categ_name)
+    res = addcategory(new_cat,db)
     if res is None:
         raise HTTPException (status_code = 404 , detail ="Owner not found!")
     return res
 
-@categ_router.get("/{categ_id}",response_model = CategoryResponse,status_code = 200)
-def get_category(categ_id:int,db:Session = Depends(get_db)):
-    find_category = getcategory(categ_id,db)
-    if find_category is None:
+@categ_router.get("/",response_model = list[CategoryResponse],status_code = 200)
+def get_category(current_user:User = Depends(get_current_user),db:Session = Depends(get_db)):
+    categ = getcategory_byuser(db,current_user.user_id)
+    if categ is None:
         raise HTTPException(status_code=404,detail="Category not found!")
-    return find_category
+    return categ
 
 @categ_router.put("/{owner_id}/{categ_id}",response_model = CategoryResponse,status_code = 200)
 def update_category(owner_id:int,categ_id:int,update_category:CategoryResponse,db:Session = Depends(get_db)):
