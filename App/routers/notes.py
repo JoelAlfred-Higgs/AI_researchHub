@@ -16,20 +16,19 @@ def get_all_notes(current_user : User = Depends(get_current_user) ,db: Session =
 
 
 @note_router.get("/{note_id}",response_model=NoteResponse,status_code=200) #changed the endpoint to standard api endpoints
-def get_note(note_id: int,db:Session = Depends(get_db)):
+def get_note(note_id: int,current:User = Depends(get_current_user),db:Session = Depends(get_db)):
+    
     find_note = getnote(note_id,db)
-    if find_note is None:
+    if find_note is None or find_note.owner_id != current.user_id:
        raise HTTPException(status_code=404, detail="Note not found!")
     return find_note
 
- 
 
-@note_router.get("/user/{owner_id}/{categ_id}",response_model = list[NoteResponse],status_code = 200)
-def get_notes_bycategory(owner_id:int,categ_id:int,db:Session = Depends(get_db)):
-    notes_by_category = getallnotes_bycategory(db,owner_id,categ_id)
-    if notes_by_category is None:
-        raise HTTPException(status_code=404, detail="No notes found for user!")
+@note_router.get("/mine/category/{categ_id}",response_model = list[NoteResponse],status_code = 200)
+def get_notes_bycategory(categ_id:int,current:User = Depends(get_current_user),db:Session = Depends(get_db)):
+    notes_by_category = getallnotes_bycategory(db,current.user_id,categ_id)
     return notes_by_category
+
 
 @note_router.post("/",response_model = NoteResponse,status_code=201)
 def add_note(note:CreateNote,current_user : User = Depends(get_current_user),db:Session = Depends(get_db)):
@@ -39,18 +38,32 @@ def add_note(note:CreateNote,current_user : User = Depends(get_current_user),db:
         return res
     raise HTTPException(status_code=409, detail="Note already exists!")
 
-@note_router.put("/{id}",response_model = NoteResponse,status_code=200)
-def update_note(id:int,content:UpdateNote,db:Session = Depends(get_db)):
-    updated = updatenote(content,id,db)
+@note_router.put("/{note_id}",response_model = NoteResponse,status_code=200)
+def update_note(note_id:int,content:UpdateNote,current:User = Depends(get_current_user),db:Session = Depends(get_db)):
+    find_note = getnote(note_id,db)
+    if find_note is None:
+        
+        raise HTTPException(status_code=404, detail="Not Found!")
+    if find_note.owner_id != current.user_id:
+        raise HTTPException(status_code=404, detail="Not Found!")
+    updated = updatenote(content,note_id,current.user_id,db)
     if updated is not None:
         return updated
     raise HTTPException(status_code=404, detail="Note not found!")
 
 
-@note_router.delete("/{owner_id}/{note_id}",status_code=204)
-def delete_note(owner_id:int,note_id:int,db:Session = Depends(get_db)):
-    deleted = deletenote(note_id,owner_id,db)
-    if deleted == 1:
-        return  
-    raise HTTPException(status_code=404, detail="Note not found!")
+@note_router.delete("/{note_id}", status_code=204)
+def delete_note(
+    note_id: int,
+    current: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    deleted = deletenote(note_id, current.user_id, db)
 
+    if deleted == "not_found":
+        raise HTTPException(status_code=404, detail="Note not found!")
+
+    if deleted == "forbidden":
+        raise HTTPException(status_code=404, detail="Note not found!")
+
+    return None

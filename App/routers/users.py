@@ -3,7 +3,7 @@ from crud import adduser,getuser,checklogin
 from schemas import CreateUser,UserResponse,CheckUser,TokenResponse,LoginUser
 from DataBase import SessionLocal, engine, get_db
 from sqlalchemy.orm import Session
-from models import Base
+from models import Base,User
 from security import create_access_token
 from dependencies import get_current_user
 
@@ -39,5 +39,5 @@ def login_user(user: LoginUser,db:Session = Depends(get_db)):
     
 
 @user_router.get("/me", response_model=UserResponse)
-def read_current_user(current_user  = Depends(get_current_user)):
+def read_current_user(current_user:User  = Depends(get_current_user)):
     return current_user

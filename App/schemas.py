@@ -12,6 +12,9 @@ class CheckUser(BaseModel):
         user_name : str
         email : EmailStr
 
+class UpdateCategory(BaseModel):
+    categ_name: str
+
 class LoginUser(BaseModel):
     email: EmailStr
     password: str

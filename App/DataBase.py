@@ -1,7 +1,17 @@
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
+from os import getenv
+from dotenv import load_dotenv
 
-db_url = "mysql+pymysql://root:Ajoel14%24@localhost:3306/AIresearchHub"
+load_dotenv()
+
+DB_USER = getenv("DB_USER")
+DB_PASS = getenv("DB_PASS")
+DB_HOST = getenv("DB_HOST")
+DB_PORT = getenv("DB_PORT")
+DB_NAME = getenv("DB_NAME")
+
+db_url = f"mysql+pymysql://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
    
 engine = create_engine(db_url)
 

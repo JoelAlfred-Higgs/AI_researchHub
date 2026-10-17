@@ -22,7 +22,7 @@ from security import JWT_ALGORITHM,JWT_SECRET
 from fastapi.security import HTTPBearer,HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
 from models import User
-from sqlalchemy import text
+
 
 # Set up HTTP Bearer token authentication scheme.
 # HTTPBearer looks for the "Authorization: Bearer <token>" header in incoming HTTP requests.
@@ -57,24 +57,18 @@ def get_current_user(
     try:
         # jwt.decode checks the signature using JWT_SECRET and ensures the token is valid & not expired
         payload = jwt.decode(credentials.credentials, JWT_SECRET, algorithms=[JWT_ALGORITHM])
-        user_id = payload.get("sub")
+        user_id = int(payload.get("sub"))
 
     except (InvalidTokenError, KeyError, TypeError, ValueError):
         # Triggers if the token signature is invalid, expired, or malformed
         raise HTTPException(
             status_code=401,
-            detail="User not found!",
+            detail="Invalid or expired token",
             headers={"WWW-Authenticate": "Bearer"}
         )
 
     # Step 3: Query the database to find the user with this user_id
     user = db.query(User).filter(User.user_id == user_id).first()
-    
-    print("Database:", db.execute(text("SELECT DATABASE()")).scalar())
-    print("User ID from token:", user_id)
-
-    user = db.query(User).filter(User.user_id == user_id).first()
-    print("User found:", user)
 
     # Step 4: If no user with that ID exists in the database, reject the request
     if user is None:

@@ -28,16 +28,14 @@ def addnote(new_note,db):
     db.refresh(new_note)
     return new_note
 
-def updatenote(content,note_id,db):
+def updatenote(content,note_id,current_userid,db):
     category_exist = db.query(Category).filter(Category.categ_id == content.category_id).first()
     if category_exist is None:
         return None
-    note_exist = db.query(Note).filter(Note.note_id == note_id).first()
+    note_exist = db.query(Note).filter(Note.note_id == note_id,Note.owner_id == current_userid).first()
     if note_exist is None:
         return None  
-    owner_exist = db.query(Category).filter(Category.owner_id == note_exist.owner_id,Category.categ_id == content.category_id).first()
-    if owner_exist is None:
-        return None
+
     if note_exist:
        note_exist.title = content.title
        note_exist.content = content.content
@@ -52,14 +50,14 @@ def deletenote(note_id, owner_id, db):
     delete = db.query(Note).filter(Note.note_id == note_id).first()
 
     if delete is None:
-        return None
+        return "not_found"
 
     if delete.owner_id != owner_id:
-        return None
+        return "forbidden"
 
     db.delete(delete)
     db.commit()
-    return 1
+    return "deleted"
 
 
 def adduser(user, db):
@@ -99,26 +97,25 @@ def getcategory(category_id,db):
 
 def updatecategory(category_id,owner_id,new_categ,db):
    check_categ = db.query(Category).filter(Category.categ_id == category_id).first()
-   if check_categ is None:
+   if check_categ is None or check_categ.owner_id != owner_id:
        return None
-   if check_categ.owner_id == owner_id:
-        check_categ.categ_name = new_categ.categ_name
-        db.commit()
-        db.refresh(check_categ) 
-        return check_categ 
-   return None 
+   check_categ.categ_name = new_categ.categ_name
+   db.commit()
+   db.refresh(check_categ) 
+   return check_categ 
+  
 
 def deletecategory(category_id, owner_id, db):
     del_categ = db.query(Category).filter(Category.categ_id == category_id).first()
 
     if del_categ is None:
-        return None
+        return "not_found"
     if del_categ.owner_id != owner_id:
-        return None
+        return "forbidden"
     notes_exist = db.query(Note).filter(Note.category_id == category_id).first()
     if notes_exist is not None:
-        return None
+        return "has_notes"
     db.delete(del_categ)
     db.commit()
 
-    return 1
+    return "deleted"
