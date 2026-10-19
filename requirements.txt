@@ -8,3 +8,4 @@ pwdlib[argon2]
 alembic
 pytest
 httpx
+email-validator
