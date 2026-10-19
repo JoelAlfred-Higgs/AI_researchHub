@@ -3,7 +3,8 @@ uvicorn[standard]
 sqlalchemy
 pymysql
 python-dotenv
+PyJWT
 pwdlib[argon2]
-pyjwt
-python-dotenv
-datetime
+alembic
+pytest
+httpx
