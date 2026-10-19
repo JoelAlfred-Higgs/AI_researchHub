@@ -1,14 +1,14 @@
 from fastapi import APIRouter,Depends,HTTPException
 from crud import adduser,getuser,checklogin
 from schemas import CreateUser,UserResponse,CheckUser,TokenResponse,LoginUser
-from DataBase import SessionLocal, engine, get_db
+from DataBase import SessionLocal,get_db
 from sqlalchemy.orm import Session
-from models import Base,User
+from models import User
 from security import create_access_token
 from dependencies import get_current_user
 
 user_router  = APIRouter()
-Base.metadata.create_all(bind = engine) 
+
 
 @user_router.post("/",status_code=201,response_model=UserResponse)
 def add_newuser(user:CreateUser,db:Session = Depends(get_db)):
