@@ -83,7 +83,4 @@ def delete_note(
     if deleted == "not_found":
         raise HTTPException(status_code=404, detail="Note not found!")
 
-    if deleted == "forbidden":
-        raise HTTPException(status_code=404, detail="Note not found!")
-
     return None

@@ -9,22 +9,43 @@ from dotenv import load_dotenv
 load_dotenv()
 load_dotenv(Path(__file__).with_name(".env"))
 
-JWT_SECRET = os.getenv("JWT_SECRET_KEY")
+class ConfigurationError(RuntimeError):
+    """Raised when required authentication configuration is missing or invalid."""
 
-if not JWT_SECRET:
-    raise RuntimeError("Jwt_secret key is not defined")
 
-JWT_ALGORITHM = os.getenv("JWT_ALGORITHM", "HS256")
-ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", 30))
+def get_jwt_secret() -> str:
+    jwt_secret = os.getenv("JWT_SECRET_KEY")
+    if not jwt_secret:
+        raise ConfigurationError("JWT_SECRET_KEY is not configured")
+    return jwt_secret
+
+
+def get_jwt_algorithm() -> str:
+    return os.getenv("JWT_ALGORITHM", "HS256")
+
+
+def get_access_token_expire_minutes() -> int:
+    try:
+        expires_in = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "30"))
+    except ValueError as exc:
+        raise ConfigurationError("ACCESS_TOKEN_EXPIRE_MINUTES must be an integer") from exc
+    if expires_in <= 0:
+        raise ConfigurationError("ACCESS_TOKEN_EXPIRE_MINUTES must be positive")
+    return expires_in
+
+
+def validate_security_config():
+    get_jwt_secret()
+    get_access_token_expire_minutes()
 
 def create_access_token(user_id:int): #creates a jwt token for a User
-    expire = datetime.now(timezone.utc) + timedelta(minutes = ACCESS_TOKEN_EXPIRE_MINUTES)
+    expire = datetime.now(timezone.utc) + timedelta(minutes=get_access_token_expire_minutes())
 
     payload = {
     "sub" : str(user_id),
     "exp" : expire
    }   
-    return jwt.encode(payload,key = JWT_SECRET, algorithm = JWT_ALGORITHM) 
+    return jwt.encode(payload, key=get_jwt_secret(), algorithm=get_jwt_algorithm())
 
 
 password_hasher = PasswordHash.recommended()

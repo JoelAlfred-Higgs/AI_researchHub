@@ -5,7 +5,7 @@ from sqlalchemy import pool
 from App.models import Base
 
 from alembic import context
-from App.DataBase import engine
+from App.DataBase import get_database_url, get_engine
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -40,7 +40,7 @@ def run_migrations_offline() -> None:
     script output.
 
     """
-    url = str(engine.url)
+    url = str(get_database_url())
     context.configure(
         url=url,
         target_metadata=target_metadata,
@@ -59,7 +59,7 @@ def run_migrations_online() -> None:
     and associate a connection with the context.
 
     """
-    connectable = engine
+    connectable = get_engine()
 
     with connectable.connect() as connection:
         context.configure(

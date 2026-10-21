@@ -1,6 +1,7 @@
 
 from .models import Category, Note, User
 from .security import hash_password, verify_password
+from sqlalchemy.exc import IntegrityError
 
 def getnote(note_id, db, owner_id=None):
     query = db.query(Note).filter(Note.note_id == note_id)
@@ -72,16 +73,22 @@ def deletenote(note_id, owner_id, db):
         raise
 
 def adduser(user, db):
-    if db.query(User).filter((User.user_name == user.user_name ) | (User.email == user.email)).first():
+    normalized_email = user.email.strip().lower()
+    if db.query(User).filter((User.user_name == user.user_name ) | (User.email == normalized_email)).first():
         return None
     hashed_password = hash_password(user.password)
 
-    new_user = User(user_name=user.user_name,email=user.email,password=hashed_password)
+    new_user = User(user_name=user.user_name, email=normalized_email, password=hashed_password)
     try:
-     db.add(new_user)
-     db.commit()
-     db.refresh(new_user)
-     return new_user
+        db.add(new_user)
+        db.commit()
+        db.refresh(new_user)
+        return new_user
+    except IntegrityError:
+        # The pre-insert check is only an optimization; the database constraint
+        # remains authoritative when concurrent requests race to create a user.
+        db.rollback()
+        return None
     except Exception:
         db.rollback()
         raise
@@ -90,7 +97,7 @@ def getuser(user_id,db):
     return db.query(User).filter(User.user_id == user_id).first()
 
 def checklogin(email,pwd,db):
-    find_user = db.query(User).filter(User.email == email).first()
+    find_user = db.query(User).filter(User.email == email.strip().lower()).first()
     if find_user is None:
         return None
     if verify_password(pwd,find_user.password):

@@ -1,13 +1,21 @@
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
+from unittest.mock import Mock
 
 from App.DataBase import get_db
+from App.DataBase import ConfigurationError as DatabaseConfigurationError
+from App.DataBase import validate_database_config
 from App.main import app
 from App.models import Base
 from App.dependencies import get_current_user
+from App.crud import adduser
+from App.schemas import CreateUser
+from App.security import ConfigurationError as SecurityConfigurationError
+from App.security import validate_security_config
 
 
 @pytest.fixture
@@ -73,6 +81,66 @@ def test_user_registration_uses_isolated_database(client):
         "user_name": "newuser",
         "email": "newuser@example.com",
     }
+
+
+def test_email_addresses_are_normalized_for_registration_and_login(client):
+    registration = client.post(
+        "/users/",
+        json={
+            "user_name": "alice",
+            "email": "Alice@Example.COM",
+            "password": "SecurePassword123!",
+        },
+    )
+    assert registration.status_code == 201
+    assert registration.json()["email"] == "alice@example.com"
+
+    duplicate = client.post(
+        "/users/",
+        json={
+            "user_name": "another-alice",
+            "email": "alice@example.com",
+            "password": "SecurePassword123!",
+        },
+    )
+    assert duplicate.status_code == 409
+    assert duplicate.json() == {"detail": "User already exists!"}
+
+    login = client.post(
+        "/users/login",
+        json={"email": "ALICE@example.com", "password": "SecurePassword123!"},
+    )
+    assert login.status_code == 200
+    assert login.json()["token_type"] == "bearer"
+
+
+def test_registration_integrity_error_is_reported_as_duplicate():
+    db = Mock()
+    db.query.return_value.filter.return_value.first.return_value = None
+    db.commit.side_effect = IntegrityError("insert", {}, Exception("duplicate key"))
+    user = CreateUser(
+        user_name="race-user",
+        email="race@example.com",
+        password="SecurePassword123!",
+    )
+
+    assert adduser(user, db) is None
+    db.rollback.assert_called_once()
+
+
+def test_missing_security_configuration_is_a_clear_validation_error(monkeypatch):
+    monkeypatch.delenv("JWT_SECRET_KEY", raising=False)
+
+    with pytest.raises(SecurityConfigurationError, match="JWT_SECRET_KEY"):
+        validate_security_config()
+
+
+def test_missing_database_configuration_is_a_clear_validation_error(monkeypatch):
+    for name in ("DATABASE_URL", "TEST_DB_NAME", "DB_USER", "DB_PASS", "DB_HOST", "DB_PORT", "DB_NAME"):
+        monkeypatch.delenv(name, raising=False)
+
+    with pytest.raises(DatabaseConfigurationError, match="Missing database configuration"):
+        validate_database_config()
 
 
 def test_login_invalid_credentials(client):

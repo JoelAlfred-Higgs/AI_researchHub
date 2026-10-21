@@ -18,7 +18,7 @@ import jwt
 from jwt.exceptions import InvalidTokenError
 from fastapi import Depends,HTTPException
 from .DataBase import get_db
-from .security import JWT_ALGORITHM,JWT_SECRET
+from .security import get_jwt_algorithm, get_jwt_secret
 from fastapi.security import HTTPBearer,HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
 from .models import User
@@ -56,7 +56,11 @@ def get_current_user(
     # Step 2: Decode and verify the JWT token
     try:
         # jwt.decode checks the signature using JWT_SECRET and ensures the token is valid & not expired
-        payload = jwt.decode(credentials.credentials, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+        payload = jwt.decode(
+            credentials.credentials,
+            get_jwt_secret(),
+            algorithms=[get_jwt_algorithm()],
+        )
         user_id = int(payload.get("sub"))
 
     except (InvalidTokenError, KeyError, TypeError, ValueError):
