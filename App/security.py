@@ -1,11 +1,13 @@
 
 from pwdlib import PasswordHash
 import os
+from pathlib import Path
 import jwt
 
 from datetime import datetime, timedelta, timezone
 from dotenv import load_dotenv
 load_dotenv()
+load_dotenv(Path(__file__).with_name(".env"))
 
 JWT_SECRET = os.getenv("JWT_SECRET_KEY")
 

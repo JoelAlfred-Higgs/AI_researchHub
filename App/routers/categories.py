@@ -1,11 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
-from crud import addcategory, updatecategory, deletecategory, getcategory_byuser
-from DataBase import get_db
-from dependencies import get_current_user
-from models import Category, User
-from schemas import CreateCategory, CategoryResponse, UpdateCategory
+from ..crud import addcategory, updatecategory, deletecategory, getcategory_byuser
+from ..DataBase import get_db
+from ..dependencies import get_current_user
+from ..models import Category, User
+from ..schemas import CreateCategory, CategoryResponse, UpdateCategory
 
 categ_router = APIRouter()
 

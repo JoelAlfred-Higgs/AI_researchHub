@@ -17,11 +17,11 @@
 import jwt
 from jwt.exceptions import InvalidTokenError
 from fastapi import Depends,HTTPException
-from DataBase import get_db
-from security import JWT_ALGORITHM,JWT_SECRET
+from .DataBase import get_db
+from .security import JWT_ALGORITHM,JWT_SECRET
 from fastapi.security import HTTPBearer,HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
-from models import User
+from .models import User
 
 
 # Set up HTTP Bearer token authentication scheme.

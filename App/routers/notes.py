@@ -1,11 +1,11 @@
 from fastapi import APIRouter
 from fastapi import HTTPException,Depends
-from schemas import CreateNote,UpdateNote,NoteResponse
-from crud import getnote,addnote,updatenote,deletenote,getallnotes,getallnotes_bycategory
-from DataBase import get_db
+from ..schemas import CreateNote, UpdateNote, NoteResponse
+from ..crud import getnote, addnote, updatenote, deletenote, getallnotes, getallnotes_bycategory
+from ..DataBase import get_db
 from sqlalchemy.orm import Session
-from models import Note,User,Category
-from dependencies import get_current_user
+from ..models import Note, User, Category
+from ..dependencies import get_current_user
 
 note_router = APIRouter()
 

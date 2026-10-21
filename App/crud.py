@@ -1,6 +1,6 @@
 
-from models import Category, Note, User
-from security import hash_password, verify_password
+from .models import Category, Note, User
+from .security import hash_password, verify_password
 
 def getnote(note_id, db, owner_id=None):
     query = db.query(Note).filter(Note.note_id == note_id)

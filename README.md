@@ -73,13 +73,13 @@ Create a `.env` file with your local MySQL connection settings and JWT configura
 ### 5. Apply database migrations
 
 ```bash
-python -m alembic upgrade head
+python -m alembic -c App/alembic.ini upgrade head
 ```
 
 ### 6. Start the API
 
 ```bash
-uvicorn main:app --reload
+uvicorn App.main:app --reload
 ```
 
 Open `http://127.0.0.1:8000/docs` to explore the API.
